@@ -1,123 +1,165 @@
-# Zabbix Monitoring Integration – Enterprise IT Operations Lab
+# osTicket Helpdesk Home Lab – Enterprise Service Desk Simulation
 
 ## Overview
 
-This project extends an existing enterprise-style IT home lab by integrating **Zabbix** as a centralized monitoring and alerting platform. The goal of this phase was to introduce proactive infrastructure monitoring that complements the existing **Active Directory** and **osTicket** environment, transforming the lab from a reactive helpdesk simulation into a full **IT operations and NOC-style workflow**.
+This project implements a fully functional **osTicket-based helpdesk platform** designed to simulate a real-world enterprise IT service desk. The environment integrates tightly with **Microsoft Active Directory** using secure LDAPS authentication and demonstrates realistic service desk operations, including role-based access control, SLA enforcement, escalation workflows, and tiered support structures.
 
-Zabbix was deployed on a dedicated Ubuntu Server VM and configured to monitor both the Active Directory domain controller and the osTicket application server. This design mirrors real-world enterprise environments where monitoring systems provide early detection of issues before they impact users.
+The lab is designed to reflect how a small-to-mid-size organization might deploy and operate a production helpdesk system. Emphasis is placed on operational realism, security, and documentation quality rather than basic application installation.
 
-## Architecture Summary
+## Environment Summary
 
-### Core Components
+- **Hypervisor:** Oracle VirtualBox  
+- **Operating System:** Debian GNU/Linux 12 (Bookworm)  
+- **Web Server:** Apache 2  
+- **Application Stack:** PHP 8.2  
+- **Database:** MariaDB  
+- **Helpdesk Platform:** osTicket v1.18.x  
+- **Directory Services:** Microsoft Active Directory  
+- **Authentication Method:** LDAP over SSL (LDAPS)
 
-- **Zabbix Server**
-  - OS: Ubuntu Server
-  - Role: Centralized monitoring and alerting platform
-  - Network: Dual-homed (NAT + Host-only)
-- **Active Directory Server**
-  - OS: Windows Server
-  - Role: Identity, authentication, DNS
-- **osTicket Server**
-  - OS: Debian Linux
-  - Role: Internal IT helpdesk application
-  - Authentication: LDAPS integrated with Active Directory
+## Architecture and Design
 
-### Network Design
+The deployment follows a **centralized application server model**, commonly used in enterprise internal support environments.
 
-- **NAT Adapter**
-  - Provides internet access for updates and package installation
-- **Host-only Adapter (vboxnet0)**
-  - Internal lab network
-  - Enables secure, isolated communication between AD, osTicket, and Zabbix
-  - Static IP addressing used for infrastructure consistency
+### Architecture Components
 
-This separation reflects enterprise best practices by isolating internal service communication from external network access.
+- Dedicated Debian Linux VM hosting osTicket
+- Apache serving the web frontend
+- PHP handling application logic
+- MariaDB providing persistent data storage
+- Windows Server acting as the Active Directory domain controller
+- Secure LDAPS communication between osTicket and Active Directory
 
-## Monitoring Strategy
+This architecture prioritizes clarity, maintainability, and enterprise-aligned security practices while remaining realistic for a lab environment.
 
-Zabbix was intentionally positioned as a **NOC-level monitoring layer** above existing infrastructure, rather than as a standalone tool.
+## Authentication and Identity Integration
 
-### Active Directory Monitoring
+osTicket is fully integrated with Active Directory using **LDAP over SSL (LDAPS)** to ensure secure, centralized authentication and identity consistency.
 
-The domain controller was monitored first due to its role as foundational infrastructure.
+### Active Directory Configuration
 
-Monitored elements include:
-- Host availability
-- CPU, memory, and disk utilization
-- LDAP/LDAPS service availability
-- Core Windows services (AD DS, DNS)
+- **Domain:** lab.local  
+- **Domain Controller:** dc01.lab.local  
+- **LDAPS Port:** 636  
+- **Service Account:** svc_osticket@lab.local  
 
-**Rationale:**  
-Active Directory outages impact authentication, authorization, and downstream applications. Monitoring AD provides early detection of issues that would otherwise surface later as application or user failures.
+The Debian server trusts the internal Microsoft Certificate Authority, allowing encrypted and validated directory communication.
 
-### osTicket Monitoring
+### Authentication Model
 
-The osTicket server was monitored as a business-critical internal application.
+- End users authenticate using Active Directory credentials
+- Support agents authenticate using Active Directory accounts
+- A dedicated service account performs directory queries
+- Directory access is restricted to read-only permissions
+- All authentication traffic is encrypted using TLS
 
-Monitored elements include:
-- Host availability
-- Web service availability (Apache/Nginx)
-- Database service availability (MySQL/MariaDB)
-- Disk usage related to ticket database growth
-- Network connectivity to Active Directory over LDAPS
+## Role-Based Access Control (RBAC)
 
-**Rationale:**  
-Monitoring osTicket provides visibility into application-layer health and allows correlation between infrastructure issues (e.g., AD outages) and user-facing service impact.
+Access within osTicket is enforced using departments, roles, and permission sets that reflect enterprise service desk separation of duties.
 
-## Dependency Awareness
+### Defined Support Roles
 
-A key design goal was modeling **cause-and-effect relationships** between systems:
+- **Tier 1 Support**
+  - User-facing ticket handling
+  - Basic troubleshooting and issue resolution
+- **Tier 2 Support**
+  - Escalated issue handling
+  - Ticket reassignment and priority adjustment
+- **NOC / Infrastructure**
+  - Infrastructure-focused ticket visibility
+  - Limited exposure to end-user data
+- **Administrator**
+  - Full system configuration and management access
 
-- Active Directory failure → Authentication failures
-- Authentication failures → osTicket login issues
-- Zabbix detects AD issues before users submit tickets
+Roles are mapped to departments and designed to mirror real-world service desk team structures.
 
-This layered visibility reflects real enterprise operations, where monitoring systems are used to identify root causes rather than just symptoms.
+## Helpdesk Workflows
 
-## Alerting Philosophy
+### Ticket Intake
 
-Alerting was designed to be **minimal, actionable, and realistic**, avoiding excessive noise.
+- Web-based user portal authenticated via Active Directory
+- Categorized help topics aligned with enterprise service catalogs
+- Automatic routing based on department and issue type
 
-Examples of alert conditions:
-- Active Directory unreachable
-- LDAP/LDAPS service unavailable
-- osTicket web service down
-- Disk utilization exceeding defined thresholds
+### Ticket Lifecycle
 
-Alerts were scoped to events that would require operator intervention in a real environment.
+1. Ticket submission by authenticated user  
+2. Automatic categorization and routing  
+3. Agent assignment  
+4. User communication and internal documentation  
+5. Escalation or reassignment when required  
+6. Issue resolution and closure  
+7. Post-resolution handling and SLA evaluation  
 
-## Incident Simulation and Validation
+### Service Level Agreements (SLAs)
 
-To validate the monitoring setup, controlled service disruptions were performed (e.g., stopping critical services or simulating resource exhaustion). Zabbix successfully detected these events and generated alerts, confirming:
-
-- Agent communication was functioning correctly
-- Service checks were accurate
-- Dependencies behaved as expected
-
-This confirmed that the monitoring configuration provided meaningful operational visibility.
+- Priority-based SLAs (P1–P3)
+- Defined response and resolution targets
+- SLA enforcement based on ticket category and department
 
 ## Security Considerations
 
-- LDAPS was used for secure authentication between osTicket and Active Directory
-- Zabbix agents were configured using least-privilege principles
-- Database access was restricted to a dedicated Zabbix database user
-- Monitoring traffic was isolated within the host-only lab network
+### Application Security
 
-These measures align with common enterprise security practices.
+- Role-based permission enforcement
+- Separation of user, agent, and administrative interfaces
+- Removal of installation artifacts post-deployment
 
-## Outcome
+### Server Security
 
-This phase completed the transition from a reactive helpdesk-focused lab to a **proactive IT operations environment**. The integration of Zabbix demonstrates:
+- Dedicated database user for osTicket
+- Restricted file permissions and ownership
+- Isolation between web server, database, and system services
 
-- Centralized infrastructure monitoring
-- Cross-platform visibility (Windows and Linux)
-- Awareness of system dependencies
-- Realistic operational workflows
+### Directory Security
 
-The lab now accurately reflects how monitoring, identity services, and ticketing systems interact in real-world enterprise IT environments.
+- Encrypted LDAPS communication
+- Least-privilege service account usage
+- Certificate-based trust validation
+
+## Validation and Testing
+
+The deployment was validated through controlled testing, including:
+
+- Successful Active Directory–authenticated user logins
+- Agent authentication with role-based permission enforcement
+- Ticket creation, routing, escalation, and resolution
+- SLA enforcement verification
+- Service restarts without configuration loss
+- Validation of secure LDAPS communication
+
+## Troubleshooting and Lessons Learned
+
+Issues encountered during deployment were resolved using standard enterprise troubleshooting techniques, including:
+
+- Apache and PHP log analysis
+- PHP extension dependency resolution
+- Database authentication troubleshooting
+- File permission and ownership correction
+- Certificate trust validation for LDAPS
+
+Reinstallation was intentionally avoided in favor of structured troubleshooting to better simulate real-world operational practices.
+
+## Documentation Structure
+
+Supporting documentation, configuration notes, and screenshots are maintained in the following directories:
+
+- `/docs` – Detailed configuration and design documentation  
+- `/screenshots` – Visual validation of key configurations and workflows  
+
+## Skills Demonstrated
+
+- Linux server administration (Debian)
+- Web application deployment and hardening
+- Apache and PHP configuration
+- MariaDB administration
+- Active Directory integration using LDAPS
+- Role-based access control design
+- Enterprise service desk workflow implementation
+- SLA design and enforcement
+- Log analysis and structured troubleshooting
+- Enterprise-grade technical documentation
 
 ## Project Status
 
-This project phase is considered **complete** and intentionally frozen. Future work will focus on separate, standalone labs or certification study rather than continued expansion of this environment.
-
-The environment remains available as a reference architecture and demonstration platform.
+This project phase is considered **complete** and intentionally frozen. The environment serves as a reference implementation for enterprise service desk operations and is designed to integrate with additional infrastructure components such as centralized monitoring and NOC workflows.
