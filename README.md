@@ -137,7 +137,7 @@ Issues encountered during deployment were resolved using structured troubleshoot
 Reinstallation was intentionally avoided in favor of controlled troubleshooting to better reflect real-world operational practices.
 
 ## Documentation Structure
-Supporting documentation, configuration notes, and screenshots are available in the `/docs` and `/screenshots` directories.
+Detailed design and configuration notes are available in the `/docs` and `/screenshots` directory.
 
 ## Skills Demonstrated
 
