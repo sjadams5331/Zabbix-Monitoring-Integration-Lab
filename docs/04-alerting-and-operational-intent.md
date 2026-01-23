@@ -53,7 +53,7 @@ For example:
 - Availability loss represented higher urgency than transient utilization spikes
 - Sustained resource exhaustion was prioritized over momentary peaks
 
-![severity](../screenshots/severity_widget.png)
+![severity](../screenshots/severity.png)
 
 This severity model supports effective triage and aligns alert urgency with response expectations.
 
