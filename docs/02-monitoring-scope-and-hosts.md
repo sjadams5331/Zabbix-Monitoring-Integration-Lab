@@ -25,7 +25,7 @@ Historical trend analysis and deep diagnostics are intentionally secondary to im
 
 ## Monitored Hosts
 
-![Monitored Hosts](..screenshots/hosts.png)
+![Monitored Hosts](../screenshots/hosts.png)
 
 ### DC01 – Active Directory Domain Controller
 
