@@ -53,6 +53,8 @@ For example:
 - Availability loss represented higher urgency than transient utilization spikes
 - Sustained resource exhaustion was prioritized over momentary peaks
 
+![severity](../screenshots/severity_widgets.png)
+
 This severity model supports effective triage and aligns alert urgency with response expectations.
 
 ## Alert Lifecycle
@@ -63,6 +65,8 @@ Alerts followed a predictable lifecycle:
 2. Visible on the global dashboard
 3. Acknowledged by an operator
 4. Reviewed for root cause and resolution
+
+![lifecycle](../screenshots/resolved_issues.png)
 
 This lifecycle reinforces accountability and prevents alerts from becoming background noise.
 
