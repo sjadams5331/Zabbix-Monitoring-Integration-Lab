@@ -42,6 +42,8 @@ Observed behavior included:
 - Appropriate severity classification
 - Visibility on the global dashboard
 
+![Alert](../screenshots/no_problems.png)
+
 Alerts were acknowledged and resolved to validate the full alert lifecycle.
 
 No excessive or spurious alerts were generated during validation, confirming that alert thresholds were appropriately conservative.
@@ -54,6 +56,8 @@ Key observations:
 - Host availability was clearly represented
 - Active problems were immediately visible
 - Monitoring platform health remained observable at all times
+
+![Dashboard](../screenshots/dashboard_2.png)
 
 The dashboard supported rapid assessment without requiring deep navigation into host-specific views.
 
